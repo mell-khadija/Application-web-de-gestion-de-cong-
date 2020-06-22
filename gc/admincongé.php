@@ -7,14 +7,14 @@ session_start();
 	
 	if (isset($_GET['refuse'])) {
         $CIN = $_GET['refuse'];
-        mysqli_query($conn, "UPDATE congé SET status ='Refusé' WHERE CIN=$CIN");
+        mysqli_query($conn, "UPDATE congé SET status='Refusé' WHERE CIN=$CIN");
         $_SESSION['message'] = "Demande refusée"; 
       
     }
 
     if (isset($_GET['confirm'])) {
         $CIN = $_GET['confirm'];
-        mysqli_query($conn, "UPDATE congé SET status ='Approuvé' WHERE CIN=$CIN");
+        mysqli_query($conn, "UPDATE congé SET status='Approuvé' WHERE CIN=$CIN");
         $_SESSION['message'] = "Demande approuvée"; 
      
     }
@@ -23,106 +23,87 @@ session_start();
 
 ?>
 
+<?php  include("base.php")?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-
-    <!-- BOOTSTRAP -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
-    <!-- CSS link -->
-    <link rel="stylesheet" href="../css/style.css">
-
 </head>
-
 <body>
+<div class="container-fluid">
 
-    <?php include('base.php'); ?>
+<div class="card shadow mb-4">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">Géstion des Congés</h6>
+    <!-- view Page  -->
+  </div>
+  <div class="card-body">
 
-    <section class="contenu salarié admin">
-        <h2>Géstion des Congés</h2>
-        <div class="formaddsal">
-            <h4>Liste des demandes en attente</h4>
+    <div class="table-responsive">
+    
 
+      <?php $result = mysqli_query($conn, "SELECT congé.CIN, congé.datedemande, congé.typeconge, congé.status, nom, prénom 
+       FROM users RIGHT JOIN congé ON users.CIN = congé.CIN WHERE status = 'En attente'"); 
+       ?>
 
-            <?php $result = mysqli_query($conn, "SELECT congé.CIN, congé.date_demande, congé.type_conge, congé.status, nom, prénom 
-            FROM users RIGHT JOIN congé ON users.CIN = congé.CIN WHERE status = 'En attente'"); ?>
+        
+    
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+              <th width="4%"> CIN </th>
+              <th width="5%"> Nom</th>
+              <th width="5%"> prenom</th>
+              
+              <th width="8%">typecongé </th>
+              <th width="5%">datedemande</th>
+              <th width="5%">Status</th>
+              <th width="6%">Confirmer</th>
+              <th width="6%">Refuser</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+          <tr>
+            <td><?php  echo $row['CIN']; ?></td>
+            <td><?php  echo $row['nom']; ?></td>
+            <td><?php  echo $row['prenom']; ?></td>
+            <td><?php  echo $row['typecongé']; ?></td>
+            <td><?php  echo $row['datedemande']; ?></td>
+            <td><?php  echo $row['Statust']; ?></td>
+            <td>
+                <form action="admincongé.php" method="post">
+                    <input type="hidden" name="edit_id" value="<?php echo $row['id']; ?>">
+                    <button  type="submit" name="edit_btn" class="btn btn-success"> Confirmer</button>
+                </form>
+            </td>
+            <td>
+                <form action="admincongé.php" method="post">
+                  <input type="hidden" name="delete_id" value="<?php echo $row['id']; ?>">
+                  <button type="submit" name="delete_btn" class="btn btn-danger"> Refuser</button>
+                </form>
+            </td>
+          </tr>
+          <?php
+          
 
+          }
+        
+        ?>
+        </tbody>
+      </table>
+   
+    </div>
+  </div>
+</div>
 
-            <div class="search__container">
-                <input id="myInput" class="search__input" type="text" placeholder="Chercher un employé...">
-            </div><br>
-
-            <div class="tablediv">
-                <table class="list">
-                    <thead>
-                        <tr>
-                            <th>CIN</th>
-                            <th>Nom</th>
-                            <th>Prénom</th>
-                            <th>Type</th>
-                            <th>Date de demande</th>
-                            <th>Status</th>
-                            <th colspan="2">Action</th>
-                        </tr>
-                    </thead>
-
-                    <?php while ($row = mysqli_fetch_array($result)) { ?>
-                    <tbody id="myTable">
-                        <tr>
-                            <td><?php echo $row['CIN']; ?></td>
-                            <td><?php echo $row['nom']; ?></td>
-                            <td><?php echo $row['prénom']; ?></td>
-                            <td><?php echo $row['typeconge']; ?></td>
-                            <td><?php echo $row['datedemande']; ?></td>
-                            <td><?php echo $row['status']; ?></td>
-                            <td>
-                                <a href="admincongé.php?confirm=<?php echo $row['CIN']; ?>" class="edit_btn" id="confirm">Confirmer</a>
-                            </td>
-                            <td>
-                                <a href="admincongé.php?refuse=<?php echo $row['CIN']; ?>" id="refuse" class="del_btn">Refuser</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <?php } ?>
-                </table>
-            </div>
-
-
-        </div>
-
-    </section>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
-    </script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous">
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $("#myInput").on("keyup", function () {
-                var value = $(this).val().toLowerCase();
-                $("#myTable tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-            });
-        });
-    </script>
+</div>
+<?php  include("footer.php") ?>
+<!-- /.container-fluid -->
 
 
 </body>
-
-
 </html>
