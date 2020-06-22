@@ -1,7 +1,11 @@
 <?php
 session_start();
-unset($_SESSION['login']);
-session_destroy(); // destroy session
-header("location:login.php"); 
-?>
 
+if(isset($_POST['logout_btn']))
+{
+    session_destroy();
+    unset($_SESSION['login']);
+    header('Location: index.php');
+}
+
+?>

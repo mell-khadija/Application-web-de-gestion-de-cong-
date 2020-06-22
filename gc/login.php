@@ -29,7 +29,7 @@ include("connection.php");
         header("location:admin.php");
         
     }
-    if($result->num_rows==1 && $_SESSION['role']=="president"){
+    else if($result->num_rows==1 && $_SESSION['role']=="president"){
         header("location:president.php");
    
     }
